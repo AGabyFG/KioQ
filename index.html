@@ -228,21 +228,32 @@
     padding-left: 17px; border-left: 2px solid #e0e0de; margin-left: 4px;
   }
   .restart-wrap { display: flex; justify-content: center; margin-top: 1.5rem; }
-  .contact-box {
-    background: #EEEDFE; border: 0.5px solid #AFA9EC;
-    border-radius: var(--radius-md); padding: 16px 18px; margin-top: 1.1rem;
+  .steps-section { margin-top: 1.25rem; }
+  .steps-title { font-size: 10px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px; }
+  .step-row {
+    display: flex; align-items: flex-start; gap: 14px;
+    background: var(--gray-bg); border: 0.5px solid var(--gray-border);
+    border-radius: var(--radius-md); padding: 15px 16px; margin-bottom: 9px;
   }
-  .contact-label { font-size: 10px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
-  .contact-name { font-size: 15px; font-weight: 600; color: #3C3489; margin-bottom: 3px; }
-  .contact-email { font-size: 13px; color: #534AB7; }
+  .step-num {
+    width: 28px; height: 28px; min-width: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0; margin-top: 1px;
+  }
+  .step-num.s1 { background: #1a1a1a; color: white; }
+  .step-num.s2 { background: #EEEDFE; color: #3C3489; }
+  .step-body { flex: 1; }
+  .step-label { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
+  .step-desc { font-size: 11px; color: var(--text-tertiary); line-height: 1.45; margin-bottom: 10px; }
+  .contact-name { font-size: 14px; font-weight: 600; color: #3C3489; margin-bottom: 2px; }
+  .contact-email { font-size: 12px; color: #534AB7; margin-bottom: 8px; }
   .contact-email a { color: #534AB7; text-decoration: none; border-bottom: 1px solid #AFA9EC; }
   .contact-email a:hover { color: #3C3489; }
   .btn-mailto {
     background: #534AB7; color: white; border: none;
-    border-radius: var(--radius-sm); padding: 9px 18px;
+    border-radius: var(--radius-sm); padding: 8px 16px;
     font-size: 12px; font-weight: 600; cursor: pointer;
-    font-family: inherit; margin-top: 10px; display: inline-block;
-    text-decoration: none;
+    font-family: inherit; display: inline-block; text-decoration: none;
   }
   .btn-mailto:hover { background: #3C3489; }
   /* Footer */
@@ -570,15 +581,26 @@ function showResult(){
     ${bHTML}
     ${recsHTML?`<hr class="divider"><div class="section-title">Acciones recomendadas para el partner</div>${recsHTML}`:""}
     <hr class="divider">
-    <div class="section-title">Ejecutivo Derevo a contactar</div>
-    <div class="contact-box">
-      <div class="contact-label">Envia el reporte PDF a este ejecutivo de Derevo para dar seguimiento</div>
-      <div class="contact-name">${contactName}</div>
-      <div class="contact-email"><a href="mailto:${contactEmail}">${contactEmail}</a></div>
-      <a class="btn-mailto" href="mailto:${contactEmail}?subject=Reporte%20de%20Calificacion%20c-Agent&body=Hola%20${encodeURIComponent(contactName.split(' ')[0])}%2C%0A%0AAdjunto%20el%20reporte%20de%20calificacion%20de%20cliente%20generado%20con%20el%20cuestionario%20de%20c-Agent.%0A%0APor%20favor%20revisalo%20y%20me%20dices%20como%20seguimos.%0A%0ASaludos">Enviar reporte por correo</a>
+    <div class="steps-title">Siguientes pasos</div>
+    <div class="step-row">
+      <div class="step-num s1">1</div>
+      <div class="step-body">
+        <div class="step-label">Descarga el reporte PDF</div>
+        <div class="step-desc">Genera el reporte con todas las respuestas y recomendaciones para adjuntarlo al correo.</div>
+        <button class="btn-pdf" onclick="exportPDF()">&#8595; Descargar reporte PDF</button>
+      </div>
     </div>
-    <div class="pdf-bar">
-      <button class="btn-pdf" onclick="exportPDF()">&#8595; Descargar reporte PDF</button>
+    <div class="step-row">
+      <div class="step-num s2">2</div>
+      <div class="step-body">
+        <div class="step-label">Envia el reporte al ejecutivo Derevo de tu zona</div>
+        <div class="step-desc">Adjunta el PDF descargado en el paso anterior y envialo a:</div>
+        <div class="contact-name">${contactName}</div>
+        <div class="contact-email"><a href="mailto:${contactEmail}">${contactEmail}</a></div>
+        <a class="btn-mailto" href="mailto:${contactEmail}?subject=Reporte%20de%20Calificacion%20c-Agent&body=Hola%20${encodeURIComponent(contactName.split(' ')[0])}%2C%0A%0AAdjunto%20el%20reporte%20de%20calificacion%20de%20cliente%20generado%20con%20el%20cuestionario%20de%20c-Agent.%0A%0APor%20favor%20revisalo%20y%20me%20dices%20como%20seguimos.%0A%0ASaludos">Abrir correo</a>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:center;margin-top:1rem">
       <button class="btn-ghost" onclick="restart()">← Evaluar otro cliente</button>
     </div>`;
 }
