@@ -228,6 +228,23 @@
     padding-left: 17px; border-left: 2px solid #e0e0de; margin-left: 4px;
   }
   .restart-wrap { display: flex; justify-content: center; margin-top: 1.5rem; }
+  .contact-box {
+    background: #EEEDFE; border: 0.5px solid #AFA9EC;
+    border-radius: var(--radius-md); padding: 16px 18px; margin-top: 1.1rem;
+  }
+  .contact-label { font-size: 10px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+  .contact-name { font-size: 15px; font-weight: 600; color: #3C3489; margin-bottom: 3px; }
+  .contact-email { font-size: 13px; color: #534AB7; }
+  .contact-email a { color: #534AB7; text-decoration: none; border-bottom: 1px solid #AFA9EC; }
+  .contact-email a:hover { color: #3C3489; }
+  .btn-mailto {
+    background: #534AB7; color: white; border: none;
+    border-radius: var(--radius-sm); padding: 9px 18px;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    font-family: inherit; margin-top: 10px; display: inline-block;
+    text-decoration: none;
+  }
+  .btn-mailto:hover { background: #3C3489; }
   /* Footer */
   .footer { text-align: center; font-size: 11px; color: var(--text-tertiary); margin-top: 1.5rem; }
   .btn-pdf {
@@ -365,11 +382,17 @@ const Q=[
     {l:"Tiene intención de invertir pero requiere aprobación; expectativa de ROI en 6–12 meses",sc:3,tag:"approval"},
     {l:"Presupuesto limitado — necesitaría fondos Microsoft (Azure Accelerate / AFO) para proceder",sc:2,tag:"funding"},
     {l:"Sin presupuesto definido o con expectativas de ROI menores a 4 semanas (poco realistas)",sc:0,tag:"none"}
+  ]},
+  {s:"Zona de la oportunidad",q:"En que zona de la Republica se ubica la oportunidad?",hint:"Esto determina el ejecutivo de Derevo que debe recibir el reporte y dar seguimiento a la oportunidad.",w:"zona",opts:[
+    {l:"Zona Norte (Monterrey, Chihuahua, Sonora, Baja California y estados del norte del pais)",sc:5,tag:"norte"},
+    {l:"Zona Centro (CDMX, Estado de Mexico, Queretaro, Puebla y estados del centro del pais)",sc:5,tag:"centro"},
+    {l:"Otra zona del pais (Occidente, Sureste, Golfo u otra region)",sc:5,tag:"otra"},
+    {l:"No se sabe / La oportunidad es remota o sin ubicacion definida",sc:5,tag:"otra"}
   ]}
 ];
 
-const CAT_GROUP={size:"Perfil",industry:"Perfil",sponsor:"Decisión",timeline:"Decisión",clarity:"Caso de uso",usecase:"Caso de uso",area:"Caso de uso",users:"Caso de uso",goldlayer:"Datos",models:"Datos",azure:"Técnico",teams:"Técnico",it:"Técnico",expectations:"Expectativas",budget:"Inversión"};
-const CAT_COLOR={size:"#378ADD",industry:"#378ADD",sponsor:"#534AB7",timeline:"#534AB7",clarity:"#C0197E",usecase:"#C0197E",area:"#C0197E",users:"#C0197E",goldlayer:"#1D9E75",models:"#1D9E75",azure:"#BA7517",teams:"#BA7517",it:"#BA7517",expectations:"#D85A30",budget:"#639922"};
+const CAT_GROUP={size:"Perfil",industry:"Perfil",sponsor:"Decisión",timeline:"Decisión",clarity:"Caso de uso",usecase:"Caso de uso",area:"Caso de uso",users:"Caso de uso",goldlayer:"Datos",models:"Datos",azure:"Técnico",teams:"Técnico",it:"Técnico",expectations:"Expectativas",budget:"Inversión",zona:"Zona"};
+const CAT_COLOR={size:"#378ADD",industry:"#378ADD",sponsor:"#534AB7",timeline:"#534AB7",clarity:"#C0197E",usecase:"#C0197E",area:"#C0197E",users:"#C0197E",goldlayer:"#1D9E75",models:"#1D9E75",azure:"#BA7517",teams:"#BA7517",it:"#BA7517",expectations:"#D85A30",budget:"#639922",zona:"#534AB7"};
 
 const FLAGS={
   size_small:{sev:"amber",label:"Empresa fuera del segmento objetivo",action:"C-Agent está diseñado para Corporate y Top SMB. Valida si existe un caso de uso muy específico y un sponsor ejecutivo con capacidad de decisión antes de invertir tiempo de ventas en esta oportunidad."},
@@ -502,6 +525,14 @@ function showResult(){
   flags.sort((a,b)=>sevOrder[a.sev]-sevOrder[b.sev]);
   let recsHTML=flags.map(f=>`<div class="rec-item"><div class="rec-header"><span class="rec-dot ${f.sev}"></span><span class="rec-label">${f.label}</span></div><div class="rec-action">${f.action}</div></div>`).join("");
 
+  // Contacto segun zona (ultima pregunta)
+  const zonaTag=Q[Q.length-1].opts[ans[Q.length-1]].tag;
+  let contactName,contactEmail,contactZona;
+  if(zonaTag==='norte'){contactName='Guillermo Arias';contactEmail='gillermo.arias@derevo.com.mx';contactZona='Zona Norte';}
+  else if(zonaTag==='centro'){contactName='Daniel de la Torre';contactEmail='daniel.delatorre@derevo.com.mx';contactZona='Zona Centro';}
+  else{contactName='Daniel Gonzalez';contactEmail='jose.gonzalez@derevo.com.mx';contactZona='Otra zona / Sin definir';}
+  window._contactName=contactName;window._contactEmail=contactEmail;window._contactZona=contactZona;
+
   const sizeLabel=Q[0].opts[ans[0]].l.split("—")[0].trim();
   const industryLabel=Q[1].opts[ans[1]].l.split("—")[0].trim();
   const sponsorLabel=Q[2].opts[ans[2]].l.split("—")[0].trim();
@@ -538,6 +569,14 @@ function showResult(){
     <div class="section-title">Puntaje por dimensión</div>
     ${bHTML}
     ${recsHTML?`<hr class="divider"><div class="section-title">Acciones recomendadas para el partner</div>${recsHTML}`:""}
+    <hr class="divider">
+    <div class="section-title">Ejecutivo Derevo a contactar</div>
+    <div class="contact-box">
+      <div class="contact-label">Envia el reporte PDF a este ejecutivo de Derevo para dar seguimiento</div>
+      <div class="contact-name">${contactName}</div>
+      <div class="contact-email"><a href="mailto:${contactEmail}">${contactEmail}</a></div>
+      <a class="btn-mailto" href="mailto:${contactEmail}?subject=Reporte%20de%20Calificacion%20c-Agent&body=Hola%20${encodeURIComponent(contactName.split(' ')[0])}%2C%0A%0AAdjunto%20el%20reporte%20de%20calificacion%20de%20cliente%20generado%20con%20el%20cuestionario%20de%20c-Agent.%0A%0APor%20favor%20revisalo%20y%20me%20dices%20como%20seguimos.%0A%0ASaludos">Enviar reporte por correo</a>
+    </div>
     <div class="pdf-bar">
       <button class="btn-pdf" onclick="exportPDF()">&#8595; Descargar reporte PDF</button>
       <button class="btn-ghost" onclick="restart()">← Evaluar otro cliente</button>
@@ -740,6 +779,16 @@ function exportPDF(){
   }
 
   // ── PIE DE PÁGINA ────────────────────────
+  // Contacto Derevo en PDF
+  checkY(28);
+  sf(7,'bold',GRAY); doc.text('EJECUTIVO DEREVO A CONTACTAR',ML,y); y+=5;
+  dRect(ML,y,TW,22,[238,237,254],true);
+  sf(7,'bold',[136,136,136]); doc.text('Envia el reporte PDF a este ejecutivo para dar seguimiento a la oportunidad',ML+4,y+6);
+  sf(11,'bold',[60,52,137]); doc.text(sanitize(window._contactName||''),ML+4,y+14);
+  sf(9,'normal',[83,74,183]); doc.text(sanitize(window._contactEmail||''),ML+4,y+20);
+  sf(8,'normal',[83,74,183]); doc.text('('+sanitize(window._contactZona||'')+')',PW-MR-40,y+14);
+  y+=26;
+
   const totalPages=doc.internal.getNumberOfPages();
   for(let p=1;p<=totalPages;p++){
     doc.setPage(p);
