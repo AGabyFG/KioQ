@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calificador de Clientes — c-Agent | KIO × Derevo</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --pink: #C0197E;
+    --pink-dark: #9B1465;
+    --pink-light: #FFF0F8;
+    --pink-text: #7D0050;
+    --purple: #534AB7;
+    --purple-dark: #3C3489;
+    --purple-light: #EEEDFE;
+    --purple-border: #AFA9EC;
+    --teal: #1D9E75;
+    --teal-light: #E1F5EE;
+    --teal-border: #5DCAA5;
+    --teal-dark: #085041;
+    --teal-text: #0F6E56;
+    --amber: #BA7517;
+    --amber-light: #FAEEDA;
+    --blue: #378ADD;
+    --green: #639922;
+    --green-light: #EAF3DE;
+    --green-dark: #3B6D11;
+    --red: #E24B4A;
+    --red-light: #FCEBEB;
+    --red-dark: #A32D2D;
+    --orange: #EF9F27;
+    --gray-bg: #F5F5F3;
+    --gray-card: #ffffff;
+    --gray-border: rgba(0,0,0,0.12);
+    --gray-border-md: rgba(0,0,0,0.22);
+    --text-primary: #1a1a1a;
+    --text-secondary: #555;
+    --text-tertiary: #888;
+    --radius-sm: 8px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--gray-bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+  .page-wrap {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 2rem;
+  }
+  .logo-pill {
+    background: var(--pink);
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 5px 14px;
+    border-radius: 99px;
+    letter-spacing: 0.03em;
+  }
+  .header-title {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+  /* Card */
+  .card {
+    background: var(--gray-card);
+    border: 0.5px solid var(--gray-border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  /* Progress */
+  .pbar-bg {
+    background: #e8e8e6;
+    border-radius: 99px;
+    height: 5px;
+    margin-bottom: 1.75rem;
+  }
+  .pbar-fill {
+    height: 5px;
+    border-radius: 99px;
+    background: var(--pink);
+    transition: width 0.35s ease;
+  }
+  .sect-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 5px;
+  }
+  .q-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    line-height: 1.5;
+  }
+  .q-hint {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-bottom: 1.25rem;
+    line-height: 1.5;
+    font-style: italic;
+  }
+  /* Options */
+  .opts { display: flex; flex-direction: column; gap: 9px; }
+  .opt {
+    background: #fff;
+    border: 1px solid var(--gray-border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 14px;
+    color: var(--text-primary);
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    line-height: 1.45;
+    transition: border-color 0.15s, background 0.15s;
+    font-family: inherit;
+  }
+  .opt:hover { border-color: var(--gray-border-md); background: #fafafa; }
+  .opt.sel { border: 1.5px solid var(--pink); background: var(--pink-light); color: var(--pink-text); }
+  .radio {
+    width: 17px; height: 17px; min-width: 17px;
+    border-radius: 50%;
+    border: 1.5px solid #ccc;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px; flex-shrink: 0;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .opt.sel .radio { border-color: var(--pink); background: var(--pink); }
+  .opt.sel .radio::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: white; display: block; }
+  /* Nav */
+  .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; }
+  .btn-primary {
+    background: var(--pink); color: white; border: none;
+    border-radius: var(--radius-sm); padding: 10px 22px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: background 0.15s;
+  }
+  .btn-primary:hover { background: var(--pink-dark); }
+  .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--gray-border);
+    border-radius: var(--radius-sm); padding: 10px 18px;
+    font-size: 13px; color: var(--text-secondary);
+    cursor: pointer; font-family: inherit;
+    transition: background 0.15s;
+  }
+  .btn-ghost:hover { background: #f5f5f3; }
+  .step-n { font-size: 12px; color: var(--text-tertiary); }
+  /* Result */
+  .ring-wrap { display: flex; justify-content: center; margin-bottom: 1.5rem; }
+  .tier-badge {
+    display: inline-block; padding: 4px 14px; border-radius: 99px;
+    font-size: 11px; font-weight: 600; margin-bottom: 8px;
+  }
+  .tier-green { background: var(--green-light); color: var(--green-dark); }
+  .tier-amber { background: var(--amber-light); color: var(--amber); }
+  .tier-red { background: var(--red-light); color: var(--red-dark); }
+  .tier-purple { background: var(--purple-light); color: var(--purple-dark); }
+  .r-title { font-size: 19px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
+  .r-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.65; margin-bottom: 1.25rem; }
+  .divider { border: none; border-top: 0.5px solid var(--gray-border); margin: 1.1rem 0; }
+  .section-title {
+    font-size: 10px; font-weight: 600; color: var(--text-tertiary);
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;
+  }
+  /* Summary grid */
+  .summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 9px; margin-bottom: 1.25rem; }
+  .sum-card { background: var(--gray-bg); border-radius: var(--radius-sm); padding: 10px 12px; }
+  .sum-label { font-size: 10px; color: var(--text-tertiary); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .sum-val { font-size: 12px; font-weight: 600; color: var(--text-primary); line-height: 1.35; }
+  /* Breakdown */
+  .brow { display: flex; align-items: center; gap: 9px; margin-bottom: 7px; }
+  .blabel { font-size: 12px; color: var(--text-secondary); min-width: 130px; }
+  .bbg { flex: 1; background: #e8e8e6; border-radius: 99px; height: 5px; }
+  .bfill { height: 5px; border-radius: 99px; }
+  .bval { font-size: 11px; color: var(--text-tertiary); min-width: 30px; text-align: right; }
+  /* Proposal boxes */
+  .pkg-box { background: var(--gray-bg); border-radius: var(--radius-sm); padding: 13px 15px; }
+  .pkg-title { font-size: 11px; font-weight: 600; color: var(--text-tertiary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .pkg-val { font-size: 13px; color: var(--text-primary); line-height: 1.5; }
+  .pkg-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+  .combo-box {
+    background: var(--purple-light); border: 0.5px solid var(--purple-border);
+    border-radius: var(--radius-sm); padding: 13px 15px; margin-top: 9px;
+  }
+  .combo-title { font-size: 12px; font-weight: 600; color: var(--purple-dark); margin-bottom: 5px; }
+  .combo-body { font-size: 12px; color: var(--purple); line-height: 1.55; }
+  .ato-box {
+    background: var(--teal-light); border: 0.5px solid var(--teal-border);
+    border-radius: var(--radius-sm); padding: 13px 15px; margin-top: 9px;
+  }
+  .ato-title { font-size: 12px; font-weight: 600; color: var(--teal-dark); margin-bottom: 5px; }
+  .ato-body { font-size: 12px; color: var(--teal-text); line-height: 1.55; }
+  /* Rec items */
+  .rec-item {
+    border: 0.5px solid var(--gray-border); border-radius: var(--radius-sm);
+    padding: 13px 15px; margin-bottom: 9px;
+  }
+  .rec-header { display: flex; align-items: flex-start; gap: 9px; margin-bottom: 6px; }
+  .rec-dot { width: 8px; height: 8px; border-radius: 50%; min-width: 8px; margin-top: 4px; flex-shrink: 0; }
+  .rec-dot.purple { background: var(--purple); }
+  .rec-dot.red { background: var(--red); }
+  .rec-dot.amber { background: var(--orange); }
+  .rec-dot.green { background: var(--green); }
+  .rec-label { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+  .rec-action {
+    font-size: 12px; color: var(--text-secondary); line-height: 1.55;
+    padding-left: 17px; border-left: 2px solid #e0e0de; margin-left: 4px;
+  }
+  .restart-wrap { display: flex; justify-content: center; margin-top: 1.5rem; }
+  /* Footer */
+  .footer { text-align: center; font-size: 11px; color: var(--text-tertiary); margin-top: 1.5rem; }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+  <div class="header">
+    <span class="logo-pill">c-Agent</span>
+    <span class="header-title">Calificador de clientes — KIO IT Services × Derevo</span>
+  </div>
+
+  <div class="card" id="quiz-view">
+    <div class="pbar-bg"><div class="pbar-fill" id="pbar" style="width:0%"></div></div>
+    <div class="sect-tag" id="sect"></div>
+    <div class="q-text" id="qtxt"></div>
+    <div class="q-hint" id="qhint"></div>
+    <div class="opts" id="opts"></div>
+    <div class="nav">
+      <button class="btn-ghost" id="btnBack" onclick="goBack()">← Anterior</button>
+      <span class="step-n" id="stepN"></span>
+      <button class="btn-primary" id="btnNext" onclick="goNext()" disabled>Siguiente →</button>
+    </div>
+  </div>
+
+  <div class="card" id="result-view" style="display:none"></div>
+
+  <div class="footer">c-Agent es una solución de Derevo · Powered by KIO IT Services · Microsoft Azure OpenAI</div>
+</div>
+
+<script>
+const Q=[
+  {s:"Perfil de la empresa",q:"¿Cuál es el tamaño de la empresa del cliente?",hint:"C-Agent va dirigido a empresas Corporate y Top SMB. Esto ayuda a determinar si el cliente es el mercado objetivo.",w:"size",opts:[
+    {l:"Empresa grande / corporativa — alcance nacional o regional, estructura compleja (más de 500 empleados o facturación >$50M USD/año)",sc:5,tag:"corporate"},
+    {l:"Top SMB — empresa mediana en la parte alta del segmento, con operación establecida (100–500 empleados o facturación $10M–$50M USD/año)",sc:4,tag:"topsmb"},
+    {l:"Empresa mediana-baja (50–100 empleados o facturación <$10M USD/año)",sc:2,tag:"smb"},
+    {l:"Empresa pequeña o startup (menos de 50 empleados)",sc:0,tag:"small"}
+  ]},
+  {s:"Perfil de la empresa",q:"¿En qué industria o giro opera principalmente la empresa del cliente?",hint:"C-Agent tiene casos de éxito documentados y especializaciones pre-configuradas en estas verticales.",w:"industry",opts:[
+    {l:"Manufactura, Logística o Supply Chain",sc:5,tag:"mfg"},
+    {l:"Retail, Farmacia o Consumo masivo",sc:5,tag:"retail"},
+    {l:"Servicios financieros, Seguros o Fintech",sc:4,tag:"finance"},
+    {l:"Salud, Pharma o Ciencias de la vida",sc:4,tag:"health"},
+    {l:"Oil & Gas, Energía o Minería",sc:4,tag:"energy"},
+    {l:"Educación, Servicios profesionales u Otra industria",sc:3,tag:"other"}
+  ]},
+  {s:"Sponsor y proceso de decisión",q:"¿Quién es el sponsor o promotor interno del proyecto en la organización del cliente?",hint:"Los sponsors clave de c-Agent son directores de área de negocio (Ventas, Finanzas, Mercadeo). La venta es más ágil cuando el sponsor tiene autoridad directa.",w:"sponsor",opts:[
+    {l:"CEO, Dueño o Director General — con autoridad de compra directa",sc:5,tag:"ceo"},
+    {l:"Director de Finanzas (CFO), Director Comercial o Director de Operaciones",sc:5,tag:"biz_dir"},
+    {l:"Director de TI (CIO/CTO) o Director de Datos / Analytics",sc:4,tag:"it_dir"},
+    {l:"Gerente o coordinador de área — requiere aprobación de niveles superiores",sc:2,tag:"manager"},
+    {l:"El decisor aún no está identificado",sc:0,tag:"unknown"}
+  ]},
+  {s:"Sponsor y proceso de decisión",q:"¿En qué plazo estimado podría cerrarse la decisión de compra?",hint:"Considera el proceso de aprobación del cliente y el nivel del sponsor identificado.",w:"timeline",opts:[
+    {l:"Menos de 30 días — hay urgencia y autorización inmediata",sc:5,tag:"fast"},
+    {l:"1 a 3 meses — proceso normal de aprobación con sponsor ejecutivo",sc:4,tag:"normal"},
+    {l:"3 a 6 meses — requiere varios comités o procesos de licitación",sc:2,tag:"slow"},
+    {l:"Más de 6 meses o completamente indefinido",sc:0,tag:"unknown"}
+  ]},
+  {s:"Caso de uso y objetivo de negocio",q:"¿Tiene el cliente claridad sobre qué quiere lograr con una solución de IA conversacional?",hint:"Este es el criterio más importante para decidir el tipo de propuesta. Sin claridad en el caso de uso, el proyecto tiene riesgo alto de abandono.",w:"clarity",opts:[
+    {l:"Sí — tienen un caso de uso concreto y un dolor de negocio claro y urgente",sc:5,tag:"clear"},
+    {l:"Tienen una idea general pero necesitan aterrizar el caso de uso específico",sc:3,tag:"partial"},
+    {l:"Saben que quieren hacer algo con IA pero no saben exactamente qué ni cómo",sc:1,tag:"exploring"},
+    {l:"No tienen claridad — están en una etapa muy exploratoria sin dirección definida",sc:0,tag:"none"}
+  ]},
+  {s:"Caso de uso y objetivo de negocio",q:"¿Cuál es el problema principal que el cliente quiere resolver?",hint:"C-Agent es una plataforma de analítica conversacional. No ejecuta acciones, no automatiza procesos ni construye capas de datos.",w:"usecase",opts:[
+    {l:"Los directivos pierden horas buscando información para juntas de consejo o toma de decisiones críticas",sc:5,tag:"exec"},
+    {l:"Los equipos de ventas, finanzas o supply chain necesitan consultar datos sin depender de TI o reportes estáticos",sc:5,tag:"ops"},
+    {l:"Quieren complementar o reemplazar dashboards con una experiencia conversacional más natural e inteligente",sc:4,tag:"bi"},
+    {l:"El caso de uso aún no está bien definido o hay múltiples ideas sin priorizar",sc:1,tag:"undefined"}
+  ]},
+  {s:"Caso de uso y objetivo de negocio",q:"¿Qué área de negocio se beneficiaría principalmente de c-Agent?",hint:"C-Agent tiene agentes pre-configurados para Finanzas, Ventas y Supply Chain. Otras áreas también son válidas.",w:"area",opts:[
+    {l:"Finanzas — EBITDA, flujo de caja, márgenes, variación vs presupuesto, capital de trabajo",sc:5,tag:"finance"},
+    {l:"Ventas / Comercial — desempeño de canal, clientes, conversión, cross-sell, cumplimiento de metas",sc:5,tag:"sales"},
+    {l:"Supply Chain / Logística — inventario, proveedores, tiempos de entrega, fill rate",sc:5,tag:"supply"},
+    {l:"Operaciones, Marketing u otras áreas de negocio",sc:3,tag:"other"},
+    {l:"Múltiples áreas de forma simultánea",sc:4,tag:"multi"}
+  ]},
+  {s:"Caso de uso y objetivo de negocio",q:"¿Quiénes serán los usuarios principales de c-Agent en la organización?",hint:"Esto define el nivel de especialización requerido y el paquete más adecuado.",w:"users",opts:[
+    {l:"Ejecutivos C-Level (CEO, CFO, COO) — preguntas en juntas de consejo y decisiones estratégicas",sc:5,tag:"clevel"},
+    {l:"Directores y gerentes de área — análisis operativo y táctico del día a día",sc:4,tag:"mid"},
+    {l:"Equipos de campo (analistas, vendedores, gerentes de tienda o planta)",sc:3,tag:"field"},
+    {l:"Una combinación de múltiples niveles jerárquicos",sc:4,tag:"mix"}
+  ]},
+  {s:"Pre-requisitos de datos",q:"¿El cliente tiene al menos un modelo semántico o capa gold de datos estructurada y lista para consumirse?",hint:"Un modelo semántico es una capa de datos curada y lista para análisis — por ejemplo, una capa gold de ventas en Databricks, un modelo tabular en Fabric o un esquema limpio en Snowflake. C-Agent no incluye data engineering, integración ni transformación de datos en su alcance base.",w:"goldlayer",opts:[
+    {l:"Sí — tiene al menos un modelo semántico o capa gold accesible en cloud (Databricks, Fabric, Snowflake, Synapse u otro)",sc:5,tag:"ready"},
+    {l:"Tiene datos en sistemas (ERP, CRM) pero no están curados ni disponibles como modelo semántico",sc:2,tag:"raw"},
+    {l:"Solo tiene datos en Excel, bases locales o sistemas legacy sin ninguna capa cloud",sc:1,tag:"none"},
+    {l:"No se sabe con certeza — requiere validación con el equipo de TI del cliente",sc:2,tag:"tbd"}
+  ]},
+  {s:"Pre-requisitos de datos",q:"¿Cuántos modelos semánticos relevantes tiene el cliente para el caso de uso identificado?",hint:"Cada modelo semántico representa un dominio de negocio curado: ventas, finanzas, supply chain, etc. Esto determina el paquete recomendado (Bronze: hasta 2, Silver: hasta 4, Gold: hasta 8).",w:"models",opts:[
+    {l:"1 o 2 modelos semánticos (por ejemplo, solo ventas o solo finanzas)",sc:3,tag:"bronze"},
+    {l:"3 o 4 modelos semánticos (por ejemplo, ventas + finanzas + inventario)",sc:4,tag:"silver"},
+    {l:"5 o más modelos semánticos (múltiples dominios de negocio)",sc:5,tag:"gold"},
+    {l:"No está definido aún o los datos no están organizados por dominio",sc:1,tag:"tbd"}
+  ]},
+  {s:"Pre-requisitos técnicos",q:"¿El cliente tiene una suscripción de Microsoft Azure activa?",hint:"C-Agent corre sobre Azure OpenAI, Azure AI Search y Azure Cosmos DB. Es un requisito fundamental. Los costos de Azure se facturan por separado (~$1,000–$4,500 USD/mes según la fase).",w:"azure",opts:[
+    {l:"Sí — suscripción Azure activa con recursos disponibles (directo o vía CSP / Enterprise Agreement)",sc:5,tag:"yes"},
+    {l:"Usa otra nube (AWS, GCP) pero puede agregar una suscripción Azure",sc:3,tag:"other"},
+    {l:"No tiene suscripción Azure — requeriría crearla desde cero",sc:1,tag:"none"},
+    {l:"No se sabe con certeza",sc:2,tag:"tbd"}
+  ]},
+  {s:"Pre-requisitos técnicos",q:"¿El cliente usa Microsoft Teams activamente en su organización?",hint:"Teams es el canal principal incluido en todos los paquetes. La interfaz web está disponible desde Silver. Canales adicionales (WhatsApp, apps propias) requieren cotización aparte.",w:"teams",opts:[
+    {l:"Sí — Teams es el canal principal de comunicación y colaboración de la empresa",sc:5,tag:"yes"},
+    {l:"Sí — Teams está disponible pero no se usa de forma masiva",sc:3,tag:"partial"},
+    {l:"No — usan Google Workspace, Slack u otra plataforma",sc:2,tag:"no"},
+    {l:"No está definido o requiere verificación",sc:2,tag:"tbd"}
+  ]},
+  {s:"Pre-requisitos técnicos",q:"¿El cliente cuenta con un equipo de TI o recurso técnico que pueda apoyar la implementación?",hint:"El cliente debe proveer acceso al entorno y conectividad a las fuentes de datos. Derevo entrega el desarrollo; el cliente es responsable del ambiente.",w:"it",opts:[
+    {l:"Sí — equipo de TI dedicado con experiencia en datos y cloud",sc:5,tag:"strong"},
+    {l:"Sí — 1 o 2 personas técnicas que administran la infraestructura",sc:3,tag:"basic"},
+    {l:"Limitado — dependen principalmente de un proveedor de TI externo",sc:2,tag:"outsourced"},
+    {l:"No tienen recurso técnico interno propio",sc:1,tag:"none"}
+  ]},
+  {s:"Expectativas y capacidad de inversión",q:"¿El cliente comprende que c-Agent es una solución de consulta conversacional y NO incluye automatización de procesos ni ingeniería de datos?",hint:"Alinear expectativas es crítico: c-Agent responde preguntas sobre datos ya curados. No ejecuta acciones, no construye data warehouses ni reemplaza procesos de integración.",w:"expectations",opts:[
+    {l:"Sí — entienden claramente que es una capa de analítica conversacional sobre datos existentes",sc:5,tag:"aligned"},
+    {l:"Tienen una idea general pero necesitan mayor claridad sobre el alcance",sc:3,tag:"partial"},
+    {l:"Esperan que c-Agent también construya su capa de datos o automatice tareas operativas",sc:2,tag:"misaligned"},
+    {l:"Aún no se ha discutido el alcance con el cliente",sc:1,tag:"tbd"}
+  ]},
+  {s:"Expectativas y capacidad de inversión",q:"¿Cuál es el presupuesto disponible del cliente y su expectativa de retorno de inversión?",hint:"Referencia: implementación Bronze desde ~$20K USD + Azure ~$1K–$4.5K/mes. Fondos Microsoft: Azure Accelerate hasta $85,000 USD y programa AFO que puede cubrir hasta el 50% del consumo proyectado anual.",w:"budget",opts:[
+    {l:"Tiene presupuesto definido y aprobado; espera ROI visible en 3–6 meses (alineado con el MVP)",sc:5,tag:"full"},
+    {l:"Tiene intención de invertir pero requiere aprobación; expectativa de ROI en 6–12 meses",sc:3,tag:"approval"},
+    {l:"Presupuesto limitado — necesitaría fondos Microsoft (Azure Accelerate / AFO) para proceder",sc:2,tag:"funding"},
+    {l:"Sin presupuesto definido o con expectativas de ROI menores a 4 semanas (poco realistas)",sc:0,tag:"none"}
+  ]}
+];
+
+const CAT_GROUP={size:"Perfil",industry:"Perfil",sponsor:"Decisión",timeline:"Decisión",clarity:"Caso de uso",usecase:"Caso de uso",area:"Caso de uso",users:"Caso de uso",goldlayer:"Datos",models:"Datos",azure:"Técnico",teams:"Técnico",it:"Técnico",expectations:"Expectativas",budget:"Inversión"};
+const CAT_COLOR={size:"#378ADD",industry:"#378ADD",sponsor:"#534AB7",timeline:"#534AB7",clarity:"#C0197E",usecase:"#C0197E",area:"#C0197E",users:"#C0197E",goldlayer:"#1D9E75",models:"#1D9E75",azure:"#BA7517",teams:"#BA7517",it:"#BA7517",expectations:"#D85A30",budget:"#639922"};
+
+const FLAGS={
+  size_small:{sev:"amber",label:"Empresa fuera del segmento objetivo",action:"C-Agent está diseñado para Corporate y Top SMB. Valida si existe un caso de uso muy específico y un sponsor ejecutivo con capacidad de decisión antes de invertir tiempo de ventas en esta oportunidad."},
+  sponsor_unknown:{sev:"red",label:"Decisor no identificado — riesgo de estancamiento",action:"Sin un sponsor ejecutivo identificado el ciclo de venta se detiene. Acción: solicitar al contacto actual acceso a una sesión con el CFO, Director Comercial o CEO. El caso CEMEX publicado por Microsoft es una herramienta poderosa para abrir esa puerta."},
+  sponsor_manager:{sev:"amber",label:"Sponsor sin autoridad de compra directa",action:"El contacto actual no puede aprobar la inversión. Prepara un resumen ejecutivo de ROI con los casos de CEMEX y Farmacias Similares para que el sponsor lo eleve internamente. Propón una demo ejecutiva con el director del área."},
+  timeline_slow:{sev:"amber",label:"Ciclo de compra largo — crear urgencia",action:"Argumento clave: los fondos Microsoft Azure Accelerate y el programa AFO (hasta 50% del consumo anual cubierto por MS) tienen vigencia por trimestre fiscal. Si no se activan en el trimestre actual, pueden perderse — esto crea urgencia real en el proceso de aprobación."},
+  timeline_unknown:{sev:"amber",label:"Plazo de decisión indefinido",action:"Una oportunidad sin plazo no es pipeline activo. Siguiente paso: agendar una sesión de descubrimiento con fechas definidas y usar los fondos Microsoft como argumento de cierre con límite de tiempo."},
+  clarity_exploring:{sev:"purple",label:"Cliente en etapa exploratoria — candidato a Workshop ATO",action:"El cliente sabe que quiere hacer algo con IA pero no tiene claro el qué ni el cómo. Propuesta recomendada: Workshop ATO (AI Transformation Offer de Derevo) — una sesión estructurada para identificar casos de uso de alto valor, priorizar dominios de datos y definir el roadmap de IA de la empresa. Este workshop es el paso previo ideal antes de una propuesta de c-Agent o DIaaS."},
+  clarity_none:{sev:"purple",label:"Sin claridad estratégica — Workshop ATO antes de cualquier propuesta",action:"El cliente está en una etapa muy exploratoria sin dirección definida. La propuesta correcta en este momento es el Workshop ATO de Derevo: una sesión de discovery estratégico para ayudar al cliente a identificar dónde puede sacar valor de la IA agentic en su organización. Una vez completado el ATO, el cliente estará listo para evaluar una propuesta de c-Agent, DIaaS o una combinación de ambos."},
+  usecase_undefined:{sev:"purple",label:"Caso de uso sin definir — alinear antes de cotizar",action:"Sin un caso de uso claro no es posible dimensionar correctamente el proyecto. Si el cliente tiene intención clara de avanzar, agenda una sesión de discovery técnico-funcional (incluida en las primeras 2 semanas del MVP de c-Agent) para mapear y priorizar los casos de uso."},
+  goldlayer_raw:{sev:"amber",label:"Datos sin curar — proponer c-Agent + DIaaS en paralelo",action:"El cliente tiene datos en sistemas pero sin un modelo semántico listo. Propuesta combinada: incluir un paquete DIaaS de Derevo para construir los modelos semánticos necesarios mientras se configura c-Agent en paralelo. DIaaS incluye Data Engineers y Arquitectos de Datos especializados en Fabric, Databricks y Snowflake. Esta combinación es elegible para fondos Azure Accelerate de hasta $50,000 USD adicionales para el componente DIaaS."},
+  goldlayer_none:{sev:"amber",label:"Sin infraestructura de datos en cloud — proponer c-Agent + DIaaS",action:"El cliente solo tiene datos en Excel o sistemas locales. Propuesta: paquete combinado donde DIaaS (S, M o L) construye el data lakehouse y la capa gold mientras c-Agent se configura en paralelo una vez que los primeros modelos semánticos estén disponibles. Elegible para fondos Azure Accelerate hasta $50,000 USD para el componente DIaaS."},
+  goldlayer_tbd:{sev:"amber",label:"Estado de los datos sin validar",action:"Agenda una sesión técnica con el equipo de TI del cliente para auditar el estado de sus datos antes de dimensionar la propuesta. Si se detecta ausencia de modelos semánticos, la propuesta combinada c-Agent + DIaaS es el camino correcto."},
+  models_tbd:{sev:"amber",label:"Dominios de datos sin mapear",action:"El workshop de discovery técnico-funcional (primeras 2 semanas del MVP) es el espacio para mapear y priorizar los dominios de datos del cliente y asignar el paquete correcto (Bronze / Silver / Gold)."},
+  azure_none:{sev:"amber",label:"Sin suscripción Azure — activar con KIO/CSP",action:"Conectar al cliente con el equipo CSP de KIO IT Services para abrir una suscripción Azure. Esta apertura también habilita el acceso al programa Azure Accelerate (fondos hasta $85,000 USD) y al programa AFO — Azure Frontier Offer, que puede cubrir hasta el 50% del consumo proyectado del primer año."},
+  azure_other:{sev:"amber",label:"Cliente en otra nube — configurar Azure en coexistencia",action:"El cliente puede agregar Azure en modo multi-cloud junto a su infraestructura actual (AWS/GCP). Solo se necesita Azure para los componentes de c-Agent. KIO puede asesorar en la arquitectura multi-cloud."},
+  teams_no:{sev:"amber",label:"El cliente no usa Microsoft Teams",action:"Opciones: (1) Plan Silver o Gold incluye interfaz web — no depende de Teams. (2) Canales adicionales (WhatsApp, app embebida) disponibles como add-on con precio independiente. (3) Evaluar si el cliente adoptaría Teams como canal de IA para sus ejecutivos."},
+  teams_partial:{sev:"amber",label:"Teams disponible pero con adopción limitada",action:"Estrategia: lanzar c-Agent primero con un grupo piloto de 5–10 usuarios ejecutivos vía Teams. La adopción escala orgánicamente cuando los directivos ven el valor en sus propias juntas. El plan Silver incluye acceso web como canal complementario."},
+  it_none:{sev:"amber",label:"Sin recurso técnico interno",action:"El cliente no puede gestionar el acceso al entorno ni la conectividad a datos por su cuenta. Propuesta: incluir en la oferta un servicio de acompañamiento técnico de Derevo, o un paquete DIaaS S de soporte durante la implementación."},
+  it_outsourced:{sev:"amber",label:"TI manejada por proveedor externo",action:"El proveedor de TI externo debe participar desde el inicio. Solicitar al cliente que lo incluya en las sesiones de discovery y configuración de acceso a datos desde la semana 1."},
+  expectations_misaligned:{sev:"amber",label:"Expectativas desalineadas — alinear antes de cotizar",action:"El cliente espera que c-Agent construya su capa de datos o automatice procesos. Si necesita ambas cosas, la propuesta correcta es c-Agent + DIaaS: c-Agent para la analítica conversacional y DIaaS para la ingeniería de datos. Agenda una sesión de alineación de alcance antes de presentar la propuesta."},
+  expectations_tbd:{sev:"amber",label:"Alcance no discutido aún",action:"Antes de cotizar, agenda una sesión de alineación de alcance usando el deck comercial de c-Agent. Clarificar los tres planos: qué hace c-Agent, qué hace DIaaS y qué queda fuera del alcance de ambos."},
+  budget_none:{sev:"amber",label:"Sin presupuesto o expectativas de ROI poco realistas",action:"Dos acciones: (1) Presentar el caso ROI — CEMEX redujo tiempos de análisis de días a 3.5 segundos; Farmacias Similares alcanzó 93% de accuracy en 20+ KPIs. (2) Resaltar fondos Microsoft: Azure Accelerate hasta $85,000 USD y programa AFO que puede cubrir hasta el 50% del consumo proyectado del primer año."},
+  budget_funding:{sev:"amber",label:"Presupuesto limitado — activar fondos Microsoft",action:"Gestionar el acceso a Azure Accelerate (hasta $85,000 USD) y al programa AFO de Microsoft. Para aplicar, solicitar al cliente su proyección de usuarios activos y volumen estimado de preguntas mensuales. KIO + Derevo pueden gestionar estos fondos de forma conjunta."}
+};
+
+let cur=0,ans=new Array(Q.length).fill(null);
+
+function render(){
+  const q=Q[cur];
+  document.getElementById("pbar").style.width=Math.round(cur/Q.length*100)+"%";
+  document.getElementById("sect").textContent=q.s;
+  document.getElementById("qtxt").textContent=q.q;
+  document.getElementById("qhint").textContent=q.hint;
+  document.getElementById("stepN").textContent="Pregunta "+(cur+1)+" de "+Q.length;
+  document.getElementById("btnBack").style.visibility=cur===0?"hidden":"visible";
+  document.getElementById("btnNext").textContent=cur===Q.length-1?"Ver resultado →":"Siguiente →";
+  const ol=document.getElementById("opts");ol.innerHTML="";
+  q.opts.forEach((o,i)=>{
+    const b=document.createElement("button");
+    b.className="opt"+(ans[cur]===i?" sel":"");
+    b.innerHTML='<span class="radio"></span><span>'+o.l+"</span>";
+    b.onclick=()=>{ans[cur]=i;render();};
+    ol.appendChild(b);
+  });
+  document.getElementById("btnNext").disabled=ans[cur]===null;
+}
+
+function goBack(){if(cur>0){cur--;render();}}
+function goNext(){if(ans[cur]===null)return;if(cur<Q.length-1){cur++;render();}else showResult();}
+
+function showResult(){
+  const groups={};
+  Q.forEach((q,i)=>{
+    const g=CAT_GROUP[q.w];
+    if(!groups[g]){groups[g]={s:0,m:0,color:CAT_COLOR[q.w]};}
+    groups[g].s+=Q[i].opts[ans[i]].sc;
+    groups[g].m+=5;
+  });
+  let total=0,maxT=0;
+  Object.values(groups).forEach(d=>{total+=d.s;maxT+=d.m;});
+  const pct=Math.round((total/maxT)*100);
+
+  const flags=[];
+  let needsDIaaS=false,needsATO=false;
+  Q.forEach((q,i)=>{
+    const opt=q.opts[ans[i]];
+    const key=q.w+"_"+opt.tag;
+    if(FLAGS[key]){
+      flags.push({...FLAGS[key],key});
+      if(["goldlayer_raw","goldlayer_none","goldlayer_tbd"].includes(key)) needsDIaaS=true;
+      if(["clarity_exploring","clarity_none"].includes(key)) needsATO=true;
+    }
+  });
+
+  const clarityTag=Q[4].opts[ans[4]].tag;
+  const usecaseTag=Q[5].opts[ans[5]].tag;
+  const modTag=Q[9].opts[ans[9]].tag;
+
+  let tier,tierClass,rtitle,rdesc;
+  if(needsATO){
+    tier="Workshop ATO recomendado"; tierClass="tier-purple";
+    rtitle=clarityTag==="none"?"Discovery estratégico antes de cualquier propuesta":"Aterrizar el caso de uso antes de cotizar";
+    rdesc=clarityTag==="none"
+      ?"El cliente está en una etapa exploratoria sin dirección definida. El primer paso es un Workshop ATO de Derevo para identificar casos de uso de alto impacto y definir el roadmap de IA de la organización."
+      :"El cliente tiene intención de avanzar con IA pero necesita aterrizar el caso de uso específico. El Workshop ATO es el paso previo ideal para priorizar y definir la propuesta correcta.";
+  } else if(usecaseTag==="undefined"){
+    tier="Discovery previo recomendado"; tierClass="tier-amber";
+    rtitle="Definir el caso de uso antes de presentar propuesta";
+    rdesc="El cliente tiene claridad general pero el caso de uso específico aún no está priorizado. Agenda una sesión de discovery técnico-funcional con Derevo antes de cotizar.";
+  } else if(pct>=70){
+    tier="Candidato calificado"; tierClass="tier-green";
+    rtitle="Listo para propuesta formal";
+    rdesc="El cliente cumple los criterios clave: caso de uso claro, sponsor ejecutivo y capacidad de inversión. Avanzar con discovery formal (2 semanas) y propuesta comercial.";
+  } else if(pct>=50){
+    tier="Calificación condicional"; tierClass="tier-amber";
+    rtitle="Potencial real con brechas a trabajar";
+    rdesc="El cliente muestra interés real y cumple varios criterios, pero hay áreas de riesgo. Revisa las acciones recomendadas y agenda una sesión de discovery antes de presentar propuesta.";
+  } else {
+    tier="Calificación condicional"; tierClass="tier-amber";
+    rtitle="Oportunidad que requiere trabajo previo";
+    rdesc="El cliente tiene potencial pero varias brechas por resolver. Las recomendaciones abajo definen el camino a seguir para avanzar hacia una propuesta.";
+  }
+
+  let pkg="Por definir en discovery",pkgDetail="",pkgSub="";
+  if(modTag==="bronze"){pkg="C-Agent Bronze";pkgDetail="1 especialización · Hasta 2 modelos semánticos · ~6 semanas · Acceso vía Teams";pkgSub="Fondos MS disponibles: hasta $85,000 USD (Azure Accelerate + AFO)";}
+  else if(modTag==="silver"){pkg="C-Agent Silver";pkgDetail="2 especializaciones · Hasta 4 modelos semánticos · ~12 semanas · Teams + Web + Voz";pkgSub="Fondos MS disponibles: hasta $85,000 USD (Azure Accelerate + AFO)";}
+  else if(modTag==="gold"){pkg="C-Agent Gold";pkgDetail="3 especializaciones · Hasta 8 modelos semánticos · ~24 semanas · Teams + Web + Voz + Avatar";pkgSub="Fondos MS disponibles: hasta $85,000 USD (Azure Accelerate + AFO)";}
+  else{pkg="Por definir";pkgDetail="Mapear modelos semánticos en sesión de discovery.";}
+
+  let propuestaHTML=`<hr class="divider"><div class="section-title">Propuesta recomendada</div>
+    <div class="pkg-box"><div class="pkg-title">Paquete c-Agent</div><div class="pkg-val">${pkg} — ${pkgDetail}</div>${pkgSub?`<div class="pkg-sub">${pkgSub}</div>`:""}</div>`;
+
+  if(needsDIaaS&&!needsATO){
+    propuestaHTML+=`<div class="combo-box"><div class="combo-title">Propuesta combinada recomendada: c-Agent + DIaaS de Derevo</div><div class="combo-body">El cliente necesita preparar sus datos a la par de la implementación de c-Agent. La propuesta incluye un paquete DIaaS (S, M o L) de Derevo para construir los modelos semánticos, ejecutado en paralelo con la configuración de c-Agent. DIaaS incluye Data Engineers y Arquitectos especializados en Fabric, Databricks y Snowflake. Elegible para fondos Azure Accelerate hasta $50,000 USD adicionales para el componente DIaaS.</div></div>`;
+  }
+  if(needsATO){
+    propuestaHTML+=`<div class="ato-box"><div class="ato-title">Siguiente paso: Workshop ATO (AI Transformation Offer) de Derevo</div><div class="ato-body">Sesión estructurada de discovery estratégico para identificar casos de uso de alto valor, priorizar dominios de datos y definir el roadmap de IA de la empresa. Al completar el ATO, el cliente tendrá la claridad necesaria para evaluar una propuesta de c-Agent, DIaaS o una combinación de ambos.</div></div>`;
+  }
+
+  const groupOrder=["Perfil","Caso de uso","Decisión","Datos","Técnico","Expectativas","Inversión"];
+  let bHTML="";
+  groupOrder.forEach(g=>{
+    if(!groups[g])return;
+    const d=groups[g],p=Math.round((d.s/d.m)*100);
+    bHTML+=`<div class="brow"><span class="blabel">${g}</span><div class="bbg"><div class="bfill" style="width:${p}%;background:${d.color}"></div></div><span class="bval">${p}%</span></div>`;
+  });
+
+  const sevOrder={purple:0,red:1,amber:2,green:3};
+  flags.sort((a,b)=>sevOrder[a.sev]-sevOrder[b.sev]);
+  let recsHTML=flags.map(f=>`<div class="rec-item"><div class="rec-header"><span class="rec-dot ${f.sev}"></span><span class="rec-label">${f.label}</span></div><div class="rec-action">${f.action}</div></div>`).join("");
+
+  const sizeLabel=Q[0].opts[ans[0]].l.split("—")[0].trim();
+  const industryLabel=Q[1].opts[ans[1]].l.split("—")[0].trim();
+  const sponsorLabel=Q[2].opts[ans[2]].l.split("—")[0].trim();
+
+  const circ=2*Math.PI*42;
+  const dash=circ-((pct/100)*circ);
+  const rc=needsATO?"#534AB7":pct>=70?"#639922":pct>=50?"#EF9F27":"#E24B4A";
+
+  document.getElementById("quiz-view").style.display="none";
+  const rv=document.getElementById("result-view");rv.style.display="block";
+  rv.innerHTML=`
+    <div style="display:flex;justify-content:center;margin-bottom:1.5rem">
+      <svg width="104" height="104" viewBox="0 0 104 104">
+        <circle cx="52" cy="52" r="42" fill="none" stroke="#e8e8e6" stroke-width="7"/>
+        <circle cx="52" cy="52" r="42" fill="none" stroke="${rc}" stroke-width="7"
+          stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${dash.toFixed(1)}"
+          stroke-linecap="round" transform="rotate(-90 52 52)"/>
+        <text x="52" y="47" text-anchor="middle" font-size="21" font-weight="600" fill="#1a1a1a">${pct}%</text>
+        <text x="52" y="63" text-anchor="middle" font-size="10" fill="#888">score general</text>
+      </svg>
+    </div>
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <span class="tier-badge ${tierClass}">${tier}</span>
+      <div class="r-title">${rtitle}</div>
+      <div class="r-desc">${rdesc}</div>
+    </div>
+    <div class="summary-grid">
+      <div class="sum-card"><div class="sum-label">Tamaño / Perfil</div><div class="sum-val">${sizeLabel}</div></div>
+      <div class="sum-card"><div class="sum-label">Industria</div><div class="sum-val">${industryLabel}</div></div>
+      <div class="sum-card"><div class="sum-label">Sponsor</div><div class="sum-val">${sponsorLabel}</div></div>
+    </div>
+    ${propuestaHTML}
+    <hr class="divider">
+    <div class="section-title">Puntaje por dimensión</div>
+    ${bHTML}
+    ${recsHTML?`<hr class="divider"><div class="section-title">Acciones recomendadas para el partner</div>${recsHTML}`:""}
+    <div class="restart-wrap" style="margin-top:1.5rem"><button class="btn-ghost" onclick="restart()">← Evaluar otro cliente</button></div>`;
+}
+
+function restart(){
+  cur=0;ans=new Array(Q.length).fill(null);
+  document.getElementById("result-view").style.display="none";
+  document.getElementById("quiz-view").style.display="block";
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
